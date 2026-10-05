@@ -1,5 +1,6 @@
 Preview:
-eloquent-mousse-300789.netlify.app
+netlify salin aja ke browser: eloquent-mousse-300789.netlify.app
+vid previewnya: https://drive.google.com/drive/folders/1CyJOVwzJIRX6PNxOQv4S69Ummu6em8sF?usp=drive_link
 username: admin
 pass: admin123
 
