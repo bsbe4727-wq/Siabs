@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>SiAbs — Sistem Absensi Siswa</title>
+<title>Panel Admin — SiAbs</title><meta name="robots" content="noindex">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
 :root{
@@ -220,160 +220,155 @@
 .cr-time{font-size:11px;opacity:.85}
 @keyframes crIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
 </style>
+<style>.admin-page{display:block!important}#toast{display:block!important;visibility:visible!important;pointer-events:none!important}</style>
 </head>
 <body>
-<header class="header">
- <div class="brand"><div class="logo">N1</div><div><b>SMK NUSANTARA 1 KOTA TANGERANG</b><small>SiAbs · Sistem Absensi Siswa</small></div></div>
-</header>
+<div class="admin-page" id="adminPage">
+  <div class="admin-shell">
+    <nav class="admin-nav">
+      <div class="admin-brand">
+        <div class="logo">N1</div>
+        <div><b>SMK NUSANTARA 1 KOTA TANGERANG</b><div class="admin-label">Administrator Panel</div></div>
+      </div>
+      <div class="admin-actions">
+        <button class="admin-btn" onclick="goHome()">Halaman Absensi</button>
+        <button class="admin-btn dark" onclick="logoutAdmin()">Keluar</button>
+      </div>
+    </nav>
 
-<main class="wrap">
-<section class="hero">
- <div class="hero-content">
-  <div class="kicker">Smart Attendance System</div>
-  <h1>Tap. <span>Hadir.</span><br>Selesai.</h1>
-  <p>Platform absensi siswa yang dirancang agar proses pencatatan kehadiran terasa lebih cepat, sederhana, dan modern.</p>
-  <div class="live" id="readerStatus"><i></i> <span id="readerStatusText">Pembaca kartu siap digunakan</span></div>
- </div>
- <div class="visual"><div class="nfc">
-  <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2">
-   <path d="M25 20a16 16 0 0 0 0 24M32 14a24 24 0 0 0 0 36M39 8a32 32 0 0 0 0 48"/>
-   <path d="M13 32h38M32 13v38"/>
-  </svg>
- </div></div>
-</section>
+    <section class="admin-heading">
+      <small>Dashboard</small>
+      <h1>Selamat datang, Admin.</h1>
+      <p>Kelola data siswa dan pantau aktivitas presensi dari satu tempat.</p>
+    </section>
 
-<section class="content">
- <div class="card reader">
-  <div class="reader-top"><div><h2>Reader Absensi</h2><p>Dekatkan kartu siswa pada area pembaca untuk mencatat kehadiran.</p></div><span class="badge">ONLINE</span></div>
-  <div class="cd-box ready" id="cdBox">
-   <div class="cd-dot" id="cdDot">✓</div>
-   <div class="cd-title" id="cdTitle">SIAP</div>
-   <div class="cd-sub" id="cdSub">Silakan tempelkan kartu pada reader</div>
-   <div class="cd-result" id="cdResult">
-    <div class="cr-label" id="crLabel"></div>
-    <div class="cr-name" id="crName"></div>
-    <div class="cr-meta" id="crMeta"></div>
-    <div class="cr-status" id="crStatus"></div>
-    <div class="cr-time" id="crTime"></div>
-   </div>
+    <section class="admin-grid">
+      <div class="a-stat"><div class="a-icon">01</div><small>Total Siswa</small><strong id="adminTotalSiswa">0</strong><span>terdaftar di sistem</span></div>
+      <div class="a-stat"><div class="a-icon">02</div><small>Hadir Hari Ini</small><strong id="adminHadir">0</strong><span>tercatat di sistem</span></div>
+      <div class="a-stat"><div class="a-icon">03</div><small>Terlambat</small><strong>7</strong><span>perlu diperhatikan</span></div>
+      <div class="a-stat"><div class="a-icon">04</div><small>Tidak Hadir</small><strong>5</strong><span>belum melakukan presensi</span></div>
+    </section>
+
+    <section class="admin-panels">
+      <div class="a-panel">
+        <div class="a-panel-head">
+          <div><h2>Presensi Terbaru</h2><p>Aktivitas absensi yang baru masuk.</p></div>
+          <input class="search" id="adminSearch" oninput="renderAdmin()" placeholder="Cari nama / NIS...">
+        </div>
+        <div style="overflow:auto">
+          <table class="admin-table">
+            <thead><tr><th>Nama</th><th>NIS</th><th>Kelas</th><th>Status</th><th>Waktu</th></tr></thead>
+            <tbody id="adminRows"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="a-panel">
+        <h2>Aksi Cepat</h2><p>Menu yang sering digunakan administrator.</p>
+        <div class="quick" style="margin-top:16px">
+          <button onclick="openSiswa()">01 &nbsp; Kelola Data Siswa</button>
+          <button onclick="openRekap()">02 &nbsp; Lihat Rekap Presensi</button>
+          <button onclick="exportRekap()">03 &nbsp; Export Data Presensi</button>
+        </div>
+        <div class="activity">
+          <h2 style="font-size:14px">Aktivitas Sistem</h2>
+          <div class="activity-row"><b>Reader</b><span>Online</span></div>
+          <div class="activity-row"><b>Database lokal</b><span>Aktif</span></div>
+          <div class="activity-row"><b>Sinkronisasi</b><span>Siap</span></div>
+        </div>
+      </div>
+    </section>
   </div>
-  <div class="actions"><button id="demoPopupButton" class="primary" onclick="simulate()">Tap Kartu — Lihat Popup</button><button class="secondary" onclick="focusNis()">Input Manual</button></div>
-  <form class="manual" onsubmit="manual(event)"><input id="nis" placeholder="Masukkan nomor kartu / NIS"><button>Absen</button></form>
+</div>
+
+<div class="modal" id="siswaModal">
+ <div class="login" style="width:min(760px,100%);max-height:90vh;overflow:auto">
+  <h2 style="font:800 20px Manrope;margin:0">Kelola Data Siswa</h2>
+  <p style="font-size:12px;color:var(--muted);margin:6px 0 0">Tambah, ubah, atau hapus siswa. Absensi hanya berlaku untuk NIS yang terdaftar.</p>
+  <form class="s-form" onsubmit="simpanSiswa(event)">
+   <div class="field"><label>NAMA</label><input id="sNama" required placeholder="Nama siswa"></div>
+   <div class="field"><label>NIS</label><input id="sNis" required placeholder="NIS"></div>
+   <div class="field"><label>KELAS</label><input id="sKelas" required placeholder="Kelas"></div>
+   <div class="field"><label>UID KARTU</label><input id="sUid" placeholder="UID"></div>
+   <button id="sBtn">Tambah</button>
+  </form>
+  <div class="s-wrap"><table class="admin-table"><thead><tr><th>Nama</th><th>NIS</th><th>Kelas</th><th>UID</th><th>Aksi</th></tr></thead><tbody id="siswaRows"></tbody></table></div>
+  <button class="close" onclick="closeSiswa()">Tutup</button>
  </div>
-
- <aside class="card side">
-  <div class="side-title">Status Hari Ini</div>
-  <div class="stat"><small>Total Presensi</small><strong id="total">0</strong><span>data tersimpan</span></div>
-  <div class="stat"><small>Jam Sistem</small><strong id="clock">--:--</strong><span>WIB · realtime</span></div>
-  <div class="admin-note"><b>Area administrator</b><span>Kelola dan pantau data kehadiran melalui panel admin.</span></div>
- </aside>
-</section>
-
-<section class="card history">
- <div class="section-head"><div><h2>Riwayat Presensi</h2><p>Data yang tercatat pada browser/perangkat ini.</p></div><button class="clear" onclick="clearHistory()">Hapus semua</button></div>
- <div class="table"><table><thead><tr><th>Nama</th><th>NIS</th><th>Kelas</th><th>Status</th><th>Tanggal</th><th>Waktu</th></tr></thead><tbody id="history"></tbody></table></div>
-</section>
-</main>
-
-
+</div>
+<div class="modal" id="rekapModal">
+ <div class="login" style="width:min(820px,100%);max-height:90vh;overflow:auto">
+  <h2 style="font:800 20px Manrope;margin:0">Rekap Presensi</h2>
+  <p style="font-size:12px;color:var(--muted);margin:6px 0 0">Saring data presensi berdasarkan tanggal dan kelas.</p>
+  <div class="s-form" style="grid-template-columns:repeat(3,1fr) auto">
+   <div class="field"><label>DARI TANGGAL</label><input type="date" id="rDari" onchange="renderRekap()"></div>
+   <div class="field"><label>SAMPAI TANGGAL</label><input type="date" id="rSampai" onchange="renderRekap()"></div>
+   <div class="field"><label>KELAS</label><select id="rKelas" onchange="renderRekap()" style="width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font:inherit;background:#fff"><option value="">Semua kelas</option></select></div>
+   <button type="button" onclick="resetRekap()">Reset</button>
+  </div>
+  <p id="rInfo" style="font-size:12px;color:var(--muted);margin:0 0 10px"></p>
+  <div class="s-wrap"><table class="admin-table"><thead><tr><th>Nama</th><th>NIS</th><th>Kelas</th><th>Status</th><th>Tanggal</th><th>Waktu</th></tr></thead><tbody id="rRows"></tbody></table></div>
+  <button class="primary login-btn" style="margin-top:16px" onclick="exportRekap(rekapData())">Export hasil filter</button>
+  <button class="close" onclick="closeRekap()">Tutup</button>
+ </div>
+</div>
 <div class="toast" id="toast"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
+if(sessionStorage.getItem("adminAuth")!=="true"){location.replace("login-admin.html")}
 const demo={nama:"Muhammad Naufal",nis:"1001",kelas:"X PPLG"};
-function waktu(){const d=new Date();return{tgl:d.toLocaleDateString("id-ID",{day:"2-digit",month:"2-digit",year:"numeric"}),jam:d.toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit",second:"2-digit"})}}
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function getSiswa(){let r=localStorage.getItem("siswa");if(r===null){localStorage.setItem("siswa",JSON.stringify([demo]));return [demo]}try{return JSON.parse(r)}catch(e){return []}}
 function saveSiswa(l){localStorage.setItem("siswa",JSON.stringify(l))}
-function absen(id){const s=getSiswa().find(x=>x.nis===id||(x.uid&&x.uid===id));if(!s){showUnknownPopup(id);return null}const t=waktu();let rows=JSON.parse(localStorage.getItem("siabs")||"[]");rows.unshift({nama:s.nama,nis:s.nis,kelas:s.kelas,status:"Hadir",tgl:t.tgl,jam:t.jam});localStorage.setItem("siabs",JSON.stringify(rows.slice(0,1000)));render();toast("Absensi berhasil dicatat — "+s.nama);return s}
-function showResult(type,label,name,meta,status){
-    const now=new Date();
-    const tgl=now.toLocaleDateString("id-ID",{weekday:"long",day:"2-digit",month:"long",year:"numeric"});
-    const jam=now.toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit",second:"2-digit"}).replaceAll(".",":");
-    document.getElementById("crLabel").textContent=label;
-    document.getElementById("crName").textContent=name;
-    document.getElementById("crMeta").textContent=meta;
-    document.getElementById("crStatus").textContent=status;
-    document.getElementById("crTime").textContent=tgl+" · "+jam+" WIB";
-    const r=document.getElementById("cdResult");
-    r.className="cd-result show "+type;
-    clearTimeout(window.popupTimer);
-    window.popupTimer=setTimeout(closeAttendancePopup,4000);
-}
-function showAttendancePopup(student){showResult("ok","ABSENSI BERHASIL",student.nama,"NIS "+student.nis+" · "+student.kelas,"HADIR")}
-function showUnknownPopup(id){showResult("fail","GAGAL","Kartu Tidak Dikenal","ID "+id,"TIDAK TERDAFTAR")}
-function closeAttendancePopup(){
-    clearTimeout(window.popupTimer);
-    const r=document.getElementById("cdResult");
-    if(r) r.classList.remove("show");
-}
-
-let attendanceCooldown = false;
-let attendanceCooldownTimer = null;
-
-function setReaderStatus(ready){
-    const box = document.getElementById("readerStatus");
-    const text = document.getElementById("readerStatusText");
-    if(box) box.classList.toggle("busy", !ready);
-    if(text) text.textContent = ready ? "Pembaca kartu siap digunakan" : "Pembaca kartu belum bisa digunakan";
-    const cb=document.getElementById("cdBox");
-    if(cb){
-        cb.classList.toggle("ready", ready);cb.classList.toggle("busy", !ready);
-        document.getElementById("cdDot").textContent = ready ? "✓" : "✕";
-        document.getElementById("cdTitle").textContent = ready ? "SIAP" : "TUNGGU";
-        document.getElementById("cdSub").textContent = ready ? "Silakan tempelkan kartu pada reader" : "Pembaca belum bisa digunakan";
-    }
-}
-
-function startAttendanceCooldown(){
-    attendanceCooldown = true;
-    setReaderStatus(false);
-
-    if(attendanceCooldownTimer) clearTimeout(attendanceCooldownTimer);
-
-    attendanceCooldownTimer = setTimeout(() => {
-        attendanceCooldownTimer = null;
-        attendanceCooldown = false;
-        setReaderStatus(true);
-    }, 20000);
-}
-
-function simulate(){
-    if(attendanceCooldown){
-        toast("Pembaca belum siap, mohon tunggu sebentar.");
-        return;
-    }
-
-    const list=getSiswa();
-    if(!list.length){alert("Belum ada data siswa. Tambahkan lewat dashboard admin.");return}
-    const student=absen(list[Math.floor(Math.random()*list.length)].nis);
-    if(!student)return;
-    showAttendancePopup(student);
-    startAttendanceCooldown();
-}
-
-function manual(e){
-    e.preventDefault();
-
-    if(attendanceCooldown){
-        toast("Pembaca belum siap, mohon tunggu sebentar.");
-        return;
-    }
-
-    const x=document.getElementById("nis").value.trim();
-    if(!x)return;
-
-    const student=absen(x);
-    if(!student){return}
-    showAttendancePopup(student);
-    startAttendanceCooldown();
-}
-
-function focusNis(){document.getElementById("nis").focus();document.getElementById("nis").scrollIntoView({behavior:"smooth",block:"center"})}
-function render(){const r=JSON.parse(localStorage.getItem("siabs")||"[]");document.getElementById("total").textContent=r.length;document.getElementById("history").innerHTML=r.length?r.map(x=>`<tr><td><b>${esc(x.nama)}</b></td><td>${esc(x.nis)}</td><td>${esc(x.kelas)}</td><td>${esc(x.status)}</td><td>${esc(x.tgl)}</td><td>${esc(x.jam)}</td></tr>`).join(""):`<tr><td colspan="6" class="empty">Belum ada data presensi.</td></tr>`}
-function clearHistory(){if(confirm("Hapus seluruh riwayat?")){localStorage.removeItem("siabs");render()}}
-function clock(){document.getElementById("clock").textContent=new Date().toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"})}
+let editNis=null;
+function openSiswa(){renderSiswa();document.getElementById("siswaModal").classList.add("show")}
+function closeSiswa(){document.getElementById("siswaModal").classList.remove("show");resetSiswaForm()}
+function resetSiswaForm(){editNis=null;["sNama","sNis","sKelas","sUid"].forEach(i=>document.getElementById(i).value="");document.getElementById("sBtn").textContent="Tambah"}
+function renderSiswa(){const l=getSiswa();document.getElementById("siswaRows").innerHTML=l.length?l.map(x=>`<tr><td><b>${esc(x.nama)}</b></td><td>${esc(x.nis)}</td><td>${esc(x.kelas)}</td><td>${esc(x.uid||"-")}</td><td class="s-act"><button onclick="editSiswa('${esc(x.nis)}')">Ubah</button><button class="del" onclick="hapusSiswa('${esc(x.nis)}')">Hapus</button></td></tr>`).join(""):`<tr><td colspan="5" style="text-align:center;color:#9aa5b5;padding:25px">Belum ada data siswa.</td></tr>`;renderAdmin()}
+function simpanSiswa(e){e.preventDefault();const d={nama:sNama.value.trim(),nis:sNis.value.trim(),kelas:sKelas.value.trim(),uid:sUid.value.trim()};if(!d.nama||!d.nis||!d.kelas)return;const l=getSiswa();if(l.some(x=>x.nis===d.nis&&x.nis!==editNis)){alert("NIS "+d.nis+" sudah terdaftar.");return}if(d.uid&&l.some(x=>x.uid===d.uid&&x.nis!==editNis)){alert("UID kartu sudah dipakai siswa lain.");return}if(editNis!==null){const i=l.findIndex(x=>x.nis===editNis);l[i]=d;toast("Data siswa diperbarui.")}else{l.push(d);toast("Siswa ditambahkan.")}saveSiswa(l);resetSiswaForm();renderSiswa()}
+function editSiswa(nis){const x=getSiswa().find(v=>v.nis===nis);if(!x)return;editNis=nis;sNama.value=x.nama;sNis.value=x.nis;sKelas.value=x.kelas;sUid.value=x.uid||"";document.getElementById("sBtn").textContent="Simpan";sNama.focus()}
+function hapusSiswa(nis){if(!confirm("Hapus siswa dengan NIS "+nis+"?"))return;saveSiswa(getSiswa().filter(x=>x.nis!==nis));if(editNis===nis)resetSiswaForm();renderSiswa();toast("Siswa dihapus.")}
+function parseTgl(t){const p=String(t).split("/");return p.length===3?p[2]+"-"+p[1]+"-"+p[0]:""}
+function rekapData(){const rows=JSON.parse(localStorage.getItem("siabs")||"[]");const a=rDari.value,b=rSampai.value,k=rKelas.value;return rows.filter(x=>{const i=parseTgl(x.tgl);return (!a||i>=a)&&(!b||i<=b)&&(!k||x.kelas===k)})}
+function openRekap(){const sel=rKelas,cur=sel.value;const ks=[...new Set([...getSiswa().map(x=>x.kelas),...JSON.parse(localStorage.getItem("siabs")||"[]").map(x=>x.kelas)])].sort();sel.innerHTML='<option value="">Semua kelas</option>'+ks.map(k=>`<option value="${esc(k)}">${esc(k)}</option>`).join("");sel.value=ks.includes(cur)?cur:"";renderRekap();document.getElementById("rekapModal").classList.add("show")}
+function closeRekap(){document.getElementById("rekapModal").classList.remove("show")}
+function resetRekap(){rDari.value="";rSampai.value="";rKelas.value="";renderRekap()}
+function renderRekap(){const d=rekapData();rInfo.textContent=d.length+" catatan presensi dari "+new Set(d.map(x=>x.nis)).size+" siswa";rRows.innerHTML=d.length?d.map(x=>`<tr><td><b>${esc(x.nama)}</b></td><td>${esc(x.nis)}</td><td>${esc(x.kelas)}</td><td><span class="pill">${esc(x.status)}</span></td><td>${esc(x.tgl)}</td><td>${esc(x.jam)}</td></tr>`).join(""):`<tr><td colspan="6" style="text-align:center;color:#9aa5b5;padding:25px">Tidak ada data untuk filter ini.</td></tr>`}
 function toast(x){const e=document.getElementById("toast");e.textContent=x;e.classList.add("show");setTimeout(()=>e.classList.remove("show"),2500)}
-render();clock();setInterval(clock,1000);
+function renderAdmin(){
+ const rows=JSON.parse(localStorage.getItem("siabs")||"[]");
+ document.getElementById("adminHadir").textContent=rows.length;
+ document.getElementById("adminTotalSiswa").textContent=getSiswa().length;
+ const q=(document.getElementById("adminSearch")?.value||"").toLowerCase();
+ const filtered=rows.filter(x=>(x.nama+" "+x.nis+" "+x.kelas).toLowerCase().includes(q));
+ document.getElementById("adminRows").innerHTML=filtered.length
+ ? filtered.map(x=>`<tr><td><b>${esc(x.nama)}</b></td><td>${esc(x.nis)}</td><td>${esc(x.kelas)}</td><td><span class="pill">${esc(x.status)}</span></td><td>${esc(x.jam)}</td></tr>`).join("")
+ : `<tr><td colspan="5" style="text-align:center;color:#9aa5b5;padding:25px">Belum ada data presensi.</td></tr>`;
+}
+function exportRekap(list){
+ const rows=list||JSON.parse(localStorage.getItem("siabs")||"[]");
+ if(!rows.length){toast("Belum ada data untuk diekspor.");return}
+ const jam=v=>String(v).replaceAll(".",":");
+ const head=["No","Nama","NIS","Kelas","Status","Tanggal","Waktu"];
+ const body=rows.map((x,i)=>[i+1,x.nama,String(x.nis),x.kelas,x.status,x.tgl,jam(x.jam)]);
+ if(window.XLSX){
+  const ws=XLSX.utils.aoa_to_sheet([head,...body]);
+  ws["!cols"]=[{wch:5},{wch:26},{wch:12},{wch:12},{wch:10},{wch:13},{wch:10}];
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Rekap Presensi");
+  XLSX.writeFile(wb,"rekap-presensi.xlsx");
+  return;
+ }
+ const q=v=>`"${String(v).replaceAll('"','""')}"`;
+ const csv="\uFEFFsep=;\n"+[head,...body].map(r=>r.map(q).join(";")).join("\n");
+ const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));a.download="rekap-presensi.csv";a.click();URL.revokeObjectURL(a.href);
+}
+function goHome(){location.href="index.html"}
+function logoutAdmin(){sessionStorage.removeItem("adminAuth");location.href="login-admin.html"}
+renderAdmin();
+// otomatis update kalau ada absen baru dari halaman absensi (tab/jendela lain, browser yang sama)
+window.addEventListener("storage",()=>{renderAdmin();if(document.getElementById("siswaModal").classList.contains("show"))renderSiswa();if(document.getElementById("rekapModal").classList.contains("show"))renderRekap()});
+setInterval(renderAdmin,5000);
 </script>
 </body>
 </html>

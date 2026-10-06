@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>SiAbs — Sistem Absensi Siswa</title>
+<title>Login Admin — SiAbs</title><meta name="robots" content="noindex">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
 :root{
@@ -222,158 +222,24 @@
 </style>
 </head>
 <body>
-<header class="header">
- <div class="brand"><div class="logo">N1</div><div><b>SMK NUSANTARA 1 KOTA TANGERANG</b><small>SiAbs · Sistem Absensi Siswa</small></div></div>
-</header>
-
-<main class="wrap">
-<section class="hero">
- <div class="hero-content">
-  <div class="kicker">Smart Attendance System</div>
-  <h1>Tap. <span>Hadir.</span><br>Selesai.</h1>
-  <p>Platform absensi siswa yang dirancang agar proses pencatatan kehadiran terasa lebih cepat, sederhana, dan modern.</p>
-  <div class="live" id="readerStatus"><i></i> <span id="readerStatusText">Pembaca kartu siap digunakan</span></div>
+<div class="modal show" id="modal">
+ <div class="login">
+  <div class="icon">N1</div><h2>Login Admin</h2><p>Masuk untuk membuka panel pengelolaan sistem absensi.</p>
+  <div class="error" id="error">Username atau password salah.</div>
+  <form onsubmit="login(event)">
+   <div class="field"><label>USERNAME</label><input id="user" required placeholder="admin"></div>
+   <div class="field"><label>PASSWORD</label><input id="pass" required type="password" placeholder="••••••••"></div>
+   <button class="primary login-btn">Masuk ke Dashboard</button>
+  </form>
+  <button class="close" onclick="location.href='index.html'">Kembali ke Absensi</button>
  </div>
- <div class="visual"><div class="nfc">
-  <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2">
-   <path d="M25 20a16 16 0 0 0 0 24M32 14a24 24 0 0 0 0 36M39 8a32 32 0 0 0 0 48"/>
-   <path d="M13 32h38M32 13v38"/>
-  </svg>
- </div></div>
-</section>
+</div>
 
-<section class="content">
- <div class="card reader">
-  <div class="reader-top"><div><h2>Reader Absensi</h2><p>Dekatkan kartu siswa pada area pembaca untuk mencatat kehadiran.</p></div><span class="badge">ONLINE</span></div>
-  <div class="cd-box ready" id="cdBox">
-   <div class="cd-dot" id="cdDot">✓</div>
-   <div class="cd-title" id="cdTitle">SIAP</div>
-   <div class="cd-sub" id="cdSub">Silakan tempelkan kartu pada reader</div>
-   <div class="cd-result" id="cdResult">
-    <div class="cr-label" id="crLabel"></div>
-    <div class="cr-name" id="crName"></div>
-    <div class="cr-meta" id="crMeta"></div>
-    <div class="cr-status" id="crStatus"></div>
-    <div class="cr-time" id="crTime"></div>
-   </div>
-  </div>
-  <div class="actions"><button id="demoPopupButton" class="primary" onclick="simulate()">Tap Kartu — Lihat Popup</button><button class="secondary" onclick="focusNis()">Input Manual</button></div>
-  <form class="manual" onsubmit="manual(event)"><input id="nis" placeholder="Masukkan nomor kartu / NIS"><button>Absen</button></form>
- </div>
-
- <aside class="card side">
-  <div class="side-title">Status Hari Ini</div>
-  <div class="stat"><small>Total Presensi</small><strong id="total">0</strong><span>data tersimpan</span></div>
-  <div class="stat"><small>Jam Sistem</small><strong id="clock">--:--</strong><span>WIB · realtime</span></div>
-  <div class="admin-note"><b>Area administrator</b><span>Kelola dan pantau data kehadiran melalui panel admin.</span></div>
- </aside>
-</section>
-
-<section class="card history">
- <div class="section-head"><div><h2>Riwayat Presensi</h2><p>Data yang tercatat pada browser/perangkat ini.</p></div><button class="clear" onclick="clearHistory()">Hapus semua</button></div>
- <div class="table"><table><thead><tr><th>Nama</th><th>NIS</th><th>Kelas</th><th>Status</th><th>Tanggal</th><th>Waktu</th></tr></thead><tbody id="history"></tbody></table></div>
-</section>
-</main>
-
-
-<div class="toast" id="toast"></div>
 
 <script>
-const demo={nama:"Muhammad Naufal",nis:"1001",kelas:"X PPLG"};
-function waktu(){const d=new Date();return{tgl:d.toLocaleDateString("id-ID",{day:"2-digit",month:"2-digit",year:"numeric"}),jam:d.toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit",second:"2-digit"})}}
-function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function getSiswa(){let r=localStorage.getItem("siswa");if(r===null){localStorage.setItem("siswa",JSON.stringify([demo]));return [demo]}try{return JSON.parse(r)}catch(e){return []}}
-function saveSiswa(l){localStorage.setItem("siswa",JSON.stringify(l))}
-function absen(id){const s=getSiswa().find(x=>x.nis===id||(x.uid&&x.uid===id));if(!s){showUnknownPopup(id);return null}const t=waktu();let rows=JSON.parse(localStorage.getItem("siabs")||"[]");rows.unshift({nama:s.nama,nis:s.nis,kelas:s.kelas,status:"Hadir",tgl:t.tgl,jam:t.jam});localStorage.setItem("siabs",JSON.stringify(rows.slice(0,1000)));render();toast("Absensi berhasil dicatat — "+s.nama);return s}
-function showResult(type,label,name,meta,status){
-    const now=new Date();
-    const tgl=now.toLocaleDateString("id-ID",{weekday:"long",day:"2-digit",month:"long",year:"numeric"});
-    const jam=now.toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit",second:"2-digit"}).replaceAll(".",":");
-    document.getElementById("crLabel").textContent=label;
-    document.getElementById("crName").textContent=name;
-    document.getElementById("crMeta").textContent=meta;
-    document.getElementById("crStatus").textContent=status;
-    document.getElementById("crTime").textContent=tgl+" · "+jam+" WIB";
-    const r=document.getElementById("cdResult");
-    r.className="cd-result show "+type;
-    clearTimeout(window.popupTimer);
-    window.popupTimer=setTimeout(closeAttendancePopup,4000);
-}
-function showAttendancePopup(student){showResult("ok","ABSENSI BERHASIL",student.nama,"NIS "+student.nis+" · "+student.kelas,"HADIR")}
-function showUnknownPopup(id){showResult("fail","GAGAL","Kartu Tidak Dikenal","ID "+id,"TIDAK TERDAFTAR")}
-function closeAttendancePopup(){
-    clearTimeout(window.popupTimer);
-    const r=document.getElementById("cdResult");
-    if(r) r.classList.remove("show");
-}
-
-let attendanceCooldown = false;
-let attendanceCooldownTimer = null;
-
-function setReaderStatus(ready){
-    const box = document.getElementById("readerStatus");
-    const text = document.getElementById("readerStatusText");
-    if(box) box.classList.toggle("busy", !ready);
-    if(text) text.textContent = ready ? "Pembaca kartu siap digunakan" : "Pembaca kartu belum bisa digunakan";
-    const cb=document.getElementById("cdBox");
-    if(cb){
-        cb.classList.toggle("ready", ready);cb.classList.toggle("busy", !ready);
-        document.getElementById("cdDot").textContent = ready ? "✓" : "✕";
-        document.getElementById("cdTitle").textContent = ready ? "SIAP" : "TUNGGU";
-        document.getElementById("cdSub").textContent = ready ? "Silakan tempelkan kartu pada reader" : "Pembaca belum bisa digunakan";
-    }
-}
-
-function startAttendanceCooldown(){
-    attendanceCooldown = true;
-    setReaderStatus(false);
-
-    if(attendanceCooldownTimer) clearTimeout(attendanceCooldownTimer);
-
-    attendanceCooldownTimer = setTimeout(() => {
-        attendanceCooldownTimer = null;
-        attendanceCooldown = false;
-        setReaderStatus(true);
-    }, 20000);
-}
-
-function simulate(){
-    if(attendanceCooldown){
-        toast("Pembaca belum siap, mohon tunggu sebentar.");
-        return;
-    }
-
-    const list=getSiswa();
-    if(!list.length){alert("Belum ada data siswa. Tambahkan lewat dashboard admin.");return}
-    const student=absen(list[Math.floor(Math.random()*list.length)].nis);
-    if(!student)return;
-    showAttendancePopup(student);
-    startAttendanceCooldown();
-}
-
-function manual(e){
-    e.preventDefault();
-
-    if(attendanceCooldown){
-        toast("Pembaca belum siap, mohon tunggu sebentar.");
-        return;
-    }
-
-    const x=document.getElementById("nis").value.trim();
-    if(!x)return;
-
-    const student=absen(x);
-    if(!student){return}
-    showAttendancePopup(student);
-    startAttendanceCooldown();
-}
-
-function focusNis(){document.getElementById("nis").focus();document.getElementById("nis").scrollIntoView({behavior:"smooth",block:"center"})}
-function render(){const r=JSON.parse(localStorage.getItem("siabs")||"[]");document.getElementById("total").textContent=r.length;document.getElementById("history").innerHTML=r.length?r.map(x=>`<tr><td><b>${esc(x.nama)}</b></td><td>${esc(x.nis)}</td><td>${esc(x.kelas)}</td><td>${esc(x.status)}</td><td>${esc(x.tgl)}</td><td>${esc(x.jam)}</td></tr>`).join(""):`<tr><td colspan="6" class="empty">Belum ada data presensi.</td></tr>`}
-function clearHistory(){if(confirm("Hapus seluruh riwayat?")){localStorage.removeItem("siabs");render()}}
-function clock(){document.getElementById("clock").textContent=new Date().toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"})}
-function toast(x){const e=document.getElementById("toast");e.textContent=x;e.classList.add("show");setTimeout(()=>e.classList.remove("show"),2500)}
-render();clock();setInterval(clock,1000);
+if(sessionStorage.getItem("adminAuth")==="true")location.replace("admin.html");
+function login(e){e.preventDefault();const u=document.getElementById("user").value.trim(),p=document.getElementById("pass").value;
+ if(u==="admin"&&p==="admin123"){sessionStorage.setItem("adminAuth","true");location.href="admin.html"}else document.getElementById("error").style.display="block"}
 </script>
 </body>
 </html>
